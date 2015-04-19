@@ -22,10 +22,6 @@ var users = require('./src/javascript/server/users.js');
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
-
 app.use('/api/users', users);
 
 /// catch 404 and forwarding to error handler

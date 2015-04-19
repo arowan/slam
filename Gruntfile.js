@@ -1,6 +1,4 @@
 module.exports = function(grunt) {
-
-  // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     express: {
@@ -32,14 +30,30 @@ module.exports = function(grunt) {
         src: 'src/javascript/client/**/*.js',
         dest: 'public/javascript/application.js'
       }
+    },
+    copy: {
+      main: {
+        files: [
+          {
+            src: ['bower_components/**/*.min.js','bower_components/**/*.min.js.map'], 
+            dest: 'public/javascript/', 
+            flatten: true, 
+            filter: 'isFile', 
+            expand: true
+          }
+        ]
+      }
     }
   });
+
 
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
-
-  grunt.registerTask('build', ['jshint', 'concat']);
-  grunt.registerTask('server', ['express:dev', 'watch']);
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  
+  grunt.registerTask('build', ['jshint', 'concat', 'copy']);
+  grunt.registerTask('server', ['build', 'express:dev', 'watch']);
 };
+ 
