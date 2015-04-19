@@ -11,14 +11,14 @@ module.exports = function(grunt) {
       }
     },
     watch: {
+      express: {
+        files: ['server.js', 'src/javascript/server/**/*.js'],
+        tasks: ['express:dev'],
+        options: {
+          spawn: false
+        }
+      },
       scripts: {
-        express: {
-          files: ['server.js', 'src/javascript/server/**/*.js'],
-          tasks: ['express:dev'],
-          options: {
-            spawn: false
-          }
-        },
         files: ['Gruntfile.js', 'src/javascript/**/*.js', 'server.js'],
         tasks: ['build']
       }
