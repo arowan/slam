@@ -1,9 +1,14 @@
-<html ng-app='slamApp'>
+<html>
   <head>
     <title>Slam</title>
     <script src='/javascript/angular.min.js'></script>
+    <script src='/javascript/angular-route.min.js'></script>
+    <script src='/javascript/angular-route-segment.js'></script>    
     <script src='/javascript/application.js'></script>    
+    <link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap.min.css'></link>
+    <link rel='stylesheet' type='text/css' href='/stylesheets/flat-ui-pro.min.css'></link>
   </head>
-  <body>
+  <body ng-app='slamApp'>
+    <div app-view-segment='0'></div>
   </body>
 </html>
