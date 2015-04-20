@@ -8,9 +8,15 @@ var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/slam');
 
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(function(req, res, next){
   req.db = db;
