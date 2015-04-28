@@ -1,20 +1,19 @@
-function sessionController($scope, $http) {
+function sessionController($scope, sessionService) {
   $scope.user = {
     username: null,
     password: null
   };
 
+
   $scope.login = function () {
-    var promise = $http.post('/api/users/login', $scope.user);
-    
+    sessionService.login($scope.user);
   };
 
   $scope.register = function () {
-
+   sessionService.register($scope.user);
   };
-
 
 }
 
-sessionController.$inject = ['$scope', '$http'];
+sessionController.$inject = ['$scope', 'sessionService'];
 angular.module('slamApp').controller('sessionController', sessionController);

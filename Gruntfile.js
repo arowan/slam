@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     express: {
       dev: {
         options: {
-          script: 'server.js'        
+          script: 'server.js'
         }
       }
     },
@@ -27,7 +27,10 @@ module.exports = function(grunt) {
     },
     jshint: {
       beforeconcat: ['Gruntfile.js', 'src/javascript/**/*.js', 'server.js'],
-      afterconcat: ['public/javascript/application.js']
+      afterconcat: ['public/javascript/application.js'],
+      options: {
+        debug: true
+      }
     },
     concat: {
       dist: {

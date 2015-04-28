@@ -7,16 +7,18 @@ var port = process.env.PORT || 3000;
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/slam');
-
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+var bodyParser = require('body-parser');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({ secret: 'slamthefuckottathat' }));
 
 app.use(function(req, res, next){
   req.db = db;

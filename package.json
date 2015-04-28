@@ -14,6 +14,8 @@
     "monk": "*"
   },
   "devDependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "cookie": "^0.1.2",
     "grunt": "^0.4.5",
     "grunt-bower": "^0.18.0",
     "grunt-contrib-concat": "^0.5.1",
@@ -21,7 +23,6 @@
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-express-server": "^0.5.1",
-    "passport": "^0.2.1",
-    "passport-local": "^1.0.0"
+    "logger": "0.0.1"
   }
 }

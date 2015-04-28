@@ -1,7 +1,12 @@
 angular.module('slamApp', [
   'ngRoute', 
+  'ngCookies',
   'route-segment', 
-  'view-segment'
+  'view-segment',
+  'slamFactories', 
+  'slamServices',
+  'slamFilters',
+  'slamDirectives'
   ])
   .config(['$routeSegmentProvider', function ($routeSegmentProvider) {
     
