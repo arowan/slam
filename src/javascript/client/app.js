@@ -12,14 +12,14 @@ angular.module('slamApp', [
     
     $routeSegmentProvider.options.autoLoadTemplates = true;
     $routeSegmentProvider
-      .when('/', 'session')
+      .when('/', 'user')
 
-      .segment('session', {
+      .segment('user', {
         templateUrl: 'templates/user.html',
         controller: userController,
         resolve: {
-          user: ['$http', function ($http) {
-            return $http.get('/api/users/current');
+          user: ['sessionService', function (sessionService) {
+            return sessionService.current();
           }]
         },
         resolveFailed: {

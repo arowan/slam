@@ -86,7 +86,7 @@ router.delete('/current', function (req, res) {
 });
 
 router.get('/current', isAuthenticated, function(req, res){
-  res.json({ user: res.user });
+  res.json(res.user);
 });
 
 
