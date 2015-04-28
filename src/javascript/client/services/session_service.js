@@ -4,21 +4,21 @@ function sessionService ($http, $cookies, $q) {
     currentUser: null
   };
 
-  function setCookie (session) {
+  var setCookie = function (session) {
     $cookies._slam_session = session;
-  }
+  };
 
-  function postRequest (url, data, success, error) {
+  var postRequest = function (url, data, success, error) {
     var promise = $http.post(url, data);
     promise.then(function (response) {
       var user = response.data;
       setCookie(user._session);
       if (success) success(user);
-    }, function (error) {
-      console.log(error);
-      error();
+    }, function (response) {
+      var e = response.data;
+      if (error) error(e);
     });
-  }
+  };
 
   object.setCurrentUser = function (user) {
     object.currentUser = user;
@@ -45,9 +45,9 @@ function sessionService ($http, $cookies, $q) {
     promise.then(function (response) {
       setCookie(null);
       if (success) success();
-    }, function (error) {
-      console.log(error);
-      error();
+    }, function (response) {
+      var e = response.data;
+      if (error) error(e);
     });
   };
 

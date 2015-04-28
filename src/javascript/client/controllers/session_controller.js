@@ -6,16 +6,26 @@ function sessionController($scope, sessionService, $routeSegment) {
 
   $scope.segment = $routeSegment.chain[0];
 
-  function reload () {
+  var reload = function () {
     $scope.segment.reload();
-  }
+  };
+
+  var setError = function (data) {
+    $scope.error = data.error;
+  };
+
+  var resetError = function () {
+    $scope.error = null;
+  };
 
   $scope.login = function () {
-    sessionService.login($scope.user, reload);
+    resetError();
+    sessionService.login($scope.user, reload, setError);
   };
 
   $scope.register = function () {
-   sessionService.register($scope.user, reload);
+    resetError();
+    sessionService.register($scope.user, reload, setError);
   };
 
 }

@@ -39,16 +39,26 @@ function sessionController($scope, sessionService, $routeSegment) {
 
   $scope.segment = $routeSegment.chain[0];
 
-  function reload () {
+  var reload = function () {
     $scope.segment.reload();
-  }
+  };
+
+  var setError = function (data) {
+    $scope.error = data.error;
+  };
+
+  var resetError = function () {
+    $scope.error = null;
+  };
 
   $scope.login = function () {
-    sessionService.login($scope.user, reload);
+    resetError();
+    sessionService.login($scope.user, reload, setError);
   };
 
   $scope.register = function () {
-   sessionService.register($scope.user, reload);
+    resetError();
+    sessionService.register($scope.user, reload, setError);
   };
 
 }
@@ -84,21 +94,21 @@ function sessionService ($http, $cookies, $q) {
     currentUser: null
   };
 
-  function setCookie (session) {
+  var setCookie = function (session) {
     $cookies._slam_session = session;
-  }
+  };
 
-  function postRequest (url, data, success, error) {
+  var postRequest = function (url, data, success, error) {
     var promise = $http.post(url, data);
     promise.then(function (response) {
       var user = response.data;
       setCookie(user._session);
       if (success) success(user);
-    }, function (error) {
-      console.log(error);
-      error();
+    }, function (response) {
+      var e = response.data;
+      if (error) error(e);
     });
-  }
+  };
 
   object.setCurrentUser = function (user) {
     object.currentUser = user;
@@ -125,9 +135,9 @@ function sessionService ($http, $cookies, $q) {
     promise.then(function (response) {
       setCookie(null);
       if (success) success();
-    }, function (error) {
-      console.log(error);
-      error();
+    }, function (response) {
+      var e = response.data;
+      if (error) error(e);
     });
   };
 

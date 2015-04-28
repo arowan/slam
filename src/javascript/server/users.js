@@ -29,7 +29,7 @@ function login (req, done) {
     if (!user) {
       return done(null, false, {'error': 'invalid username / password'}, 406);
     }
-    if (user && !bcrypt.compareSync(req.body.password, user.password)) {
+    if (user && !bcrypt.compareSync(req.body.password || '', user.password)) {
       return done(null, false, {'error': 'invalid username / password'}, 406);
     }
     var cookie = buildCookie(req, user);
