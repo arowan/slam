@@ -15,7 +15,7 @@ function buildCookie (req, user) {
   var cookieHash = bcrypt.hashSync(user._id);
   var db = req.db;
   var collection = db.get('users');
-  var promise = collection.update({_id: user._id.toString()}, {$set:{cookieHash: cookieHash}});
+  collection.update({_id: user._id.toString()}, {$set:{cookieHash: cookieHash}});
   return cookieHash;
 }
 

@@ -12,7 +12,7 @@ angular.module('slamApp', [
     
     $routeSegmentProvider.options.autoLoadTemplates = true;
     $routeSegmentProvider
-      .when('/', 'user')
+      .when('/', 'user.board')
 
       .segment('user', {
         templateUrl: 'templates/user.html',
@@ -26,7 +26,15 @@ angular.module('slamApp', [
           templateUrl: 'templates/session.html',
           controller: sessionController
         }
-      });
+      })
+
+      .within()
+        .segment('board', {
+          controller: boardController,
+          templateUrl: 'templates/board.html'
+        })
+        .up()
+      .up();
 
 
   }]);
