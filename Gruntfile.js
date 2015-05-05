@@ -23,6 +23,10 @@ module.exports = function(grunt) {
       templates: {
         files: ['src/javascript/client/templates/**/*.html'],
         tasks: ['copy']
+      },
+      stylesheets: {
+        files: ['src/stylesheets/**/*.scss'],
+        tasks: ['sass']
       }
     },
     jshint: {
@@ -36,6 +40,13 @@ module.exports = function(grunt) {
       dist: {
         src: 'src/javascript/client/**/*.js',
         dest: 'public/javascript/application.js'
+      }
+    },
+    sass: {
+      dist: {
+        files: {
+          'public/stylesheets/client.css': 'src/stylesheets/client.scss'
+        }
       }
     },
     copy: {
@@ -58,16 +69,6 @@ module.exports = function(grunt) {
             flatten: true, 
             filter: 'isFile', 
             expand: true
-          },
-          {
-            src: [
-              'src/stylesheets/**/*.css',
-              'src/stylesheets/**/*.css.map'
-            ],
-            dest: 'public/stylesheets/',
-            flatten: true, 
-            filter: 'isFile', 
-            expand: true
           }
         ]
       }
@@ -80,8 +81,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  
-  grunt.registerTask('build', ['jshint', 'concat', 'copy']);
+  grunt.loadNpmTasks('grunt-contrib-sass');
+
+  grunt.registerTask('build', ['jshint', 'concat', 'copy', 'sass']);
   grunt.registerTask('server', ['build', 'express:dev', 'watch']);
 };
  
