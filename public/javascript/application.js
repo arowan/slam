@@ -1,6 +1,7 @@
 angular.module('slamApp', [
   'ngRoute', 
   'ngCookies',
+  'ngDraggable',
   'route-segment', 
   'view-segment',
   'slamFactories', 
@@ -122,7 +123,7 @@ function card () {
     scope: {
       face: '@'
     },
-    template: "<object data='/cards/{{face}}.svg' type='image/svg+xml' class='card'></object>"
+    templateUrl: 'templates/card_template.html'
   };
 }
 

@@ -5,7 +5,7 @@ function card () {
     scope: {
       face: '@'
     },
-    template: "<object data='/cards/{{face}}.svg' type='image/svg+xml' class='card'></object>"
+    templateUrl: 'templates/card_template.html'
   };
 }
 

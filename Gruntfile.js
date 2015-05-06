@@ -56,7 +56,8 @@ module.exports = function(grunt) {
             src: [
             'bower_components/**/*.min.js',
             'bower_components/**/*.min.js.map',
-            'bower_components/angular-route-segment/build/angular-route-segment.js'
+            'bower_components/angular-route-segment/build/angular-route-segment.js',
+            'bower_components/ngDraggable/ngDraggable.js'
             ], 
             dest: 'public/javascript/', 
             flatten: true, 

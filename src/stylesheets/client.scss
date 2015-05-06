@@ -1,3 +1,7 @@
-.card {
-  width: 150px;
+.card-holder {
+  z-index: 1;
+  .card {
+    z-index: 0;
+    width: 150px;
+  }
 }
