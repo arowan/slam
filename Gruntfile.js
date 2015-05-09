@@ -70,6 +70,15 @@ module.exports = function(grunt) {
               '**/*.html'
             ],
             dest: 'public/templates'
+          },{
+            cwd: 'bower_components',
+            src: [
+              '**/*.css'
+            ],
+            dest: 'public/stylesheets',
+            flatten: true, 
+            filter: 'isFile', 
+            expand: true
           }
         ],
         verbose: true

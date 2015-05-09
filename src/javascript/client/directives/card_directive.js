@@ -5,7 +5,12 @@ function card () {
     scope: {
       face: '@'
     },
-    templateUrl: 'templates/card_template.html'
+    templateUrl: '/templates/components/card_template.html',
+    link: function (scope, element) {
+      scope.onMove = function (data) {
+        console.log(data);
+      };
+    }
   };
 }
 

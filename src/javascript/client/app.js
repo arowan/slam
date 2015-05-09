@@ -1,7 +1,6 @@
 angular.module('slamApp', [
   'ngRoute', 
   'ngCookies',
-  'ngDraggable',
   'route-segment', 
   'view-segment',
   'slamFactories', 

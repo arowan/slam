@@ -1,6 +1,4 @@
-<div class='card-holder' ng-drag='true' ng-drag-object='{{face}}' ng-drag-start='console.log($data, $event)'>
-  <object data='/cards/{{face}}.svg' type='image/svg+xml' class='card'>
-    <param name="wmode" value="transparent">
-  </object>
+<div class='card-holder'>
+  <img class='card' ng-src='/cards/{{face}}.svg' drag on-move='onMove'>
+  </img>
 </div>
-sdasd
