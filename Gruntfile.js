@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       },
       templates: {
         files: ['src/javascript/client/templates/**/*.html'],
-        tasks: ['copy']
+        tasks: ['sync']
       },
       stylesheets: {
         files: ['src/stylesheets/**/*.scss'],
@@ -49,29 +49,30 @@ module.exports = function(grunt) {
         }
       }
     },
-    copy: {
+    sync: {
       main: {
         files: [
           {
+            cwd: 'bower_components',
             src: [
-            'bower_components/**/*.min.js',
-            'bower_components/**/*.min.js.map',
-            'bower_components/angular-route-segment/build/angular-route-segment.js',
-            'bower_components/ngDraggable/ngDraggable.js'
-            ], 
-            dest: 'public/javascript/', 
+              '**/*.min.js',
+              '**/*.min.js.map',
+              'angular-route-segment/build/angular-route-segment.js',
+              'ngDraggable/ngDraggable.js'
+            ],
+            dest: 'public/javascript',
             flatten: true, 
             filter: 'isFile', 
             expand: true
-          },
-          {
-            src: 'src/javascript/client/templates/**/*.html', 
-            dest: 'public/templates/',
-            flatten: true, 
-            filter: 'isFile', 
-            expand: true
+          },{
+            cwd: 'src/javascript/client/templates',
+            src: [
+              '**/*.html'
+            ],
+            dest: 'public/templates'
           }
-        ]
+        ],
+        verbose: true
       }
     }
   });
@@ -81,10 +82,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-sync');
 
-  grunt.registerTask('build', ['jshint', 'concat', 'copy', 'sass']);
+  grunt.registerTask('build', ['jshint', 'concat', 'sync', 'sass']);
   grunt.registerTask('server', ['build', 'express:dev', 'watch']);
 };
  
