@@ -3,8 +3,12 @@ function $socketService () {
     global: io.connect('http://localhost:3000')
   };
 
-  object.connect = function (channel) {
-    object[channel] = io.connect('http://localhost:3000/' + channel);
+  // object.connect = function (channel) {
+  //   object[channel] = io.connect('http://localhost:3000/' + channel);
+  // };
+
+  object.disconnect = function () {
+    return object.global.disconnect();
   };
 
   return object;

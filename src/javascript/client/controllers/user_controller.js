@@ -1,9 +1,9 @@
-function userController($scope, user, $sessionService, $routeSegment) {
+function userController($scope, user, $sessionService, $routeSegment, $socketService) {
   $scope.currentUser = user;
-  console.log(user);
   $scope.segment = $routeSegment.chain[0];
 
   function reload () {
+    $socketService.disconnect();
     $scope.segment.reload();
   }
 
@@ -12,5 +12,5 @@ function userController($scope, user, $sessionService, $routeSegment) {
   };
 }
 
-userController.$inject = ['$scope', 'user', '$sessionService', '$routeSegment'];
+userController.$inject = ['$scope', 'user', '$sessionService', '$routeSegment', '$socketService'];
 angular.module('slamApp').controller('userController', userController);

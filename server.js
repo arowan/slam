@@ -30,19 +30,33 @@ app.use(function(req, res, next){
 
 var io = require('socket.io')(server);
 
-var lobbyUsers = [];
+var lobby = require('./src/javascript/server/lobby.js')(io);
 
 io.on('connection', function (socket) {
   socket.emit('test', 'connected');
 
   socket.on('disconnect', function () {
+    if (socket.user) {
+      lobby.removeUser(socket.user);
+    }
+  });
 
+  socket.on('sendInvite', function (inviteeId) {
+    lobby.invite(inviteeId, socket.user);    
+  });
+
+  socket.on('acceptInvite', function (data) {
+    console.log(data);
+  });
+
+  socket.on('cancelInvite', function (inviteeId) {
+    lobby.cancelInvite(inviteeId, socket.user);
   });
 
   socket.on('lobby', function (data) {
-    socket.emit('lobby', {users: lobbyUsers});
-    io.emit('addLobbyUser', data);
-    lobbyUsers.push(data);
+    socket.user = data;
+    socket.emit('lobby', {users: lobby.users});
+    lobby.addUser(socket.user, socket);
   });
 
   socket.on('registerChannel', function (data) {

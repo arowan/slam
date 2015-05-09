@@ -75,21 +75,59 @@ boardController.$inject = ['$scope', '$socketService'];
 angular.module('slamApp').controller('boardController', boardController);
 
 function lobbyController($scope, $socketService, $sessionService) {
-  $scope.users = [];
+  $scope.users = {};
+  $scope.invites = [];
 
-  $socketService.global.emit('lobby', $sessionService.currentUser);
-  
-  $socketService.global.on('lobby', function (data) {
-    $scope.$apply(function () {
-      $scope.users = data.users;
-    });
-  });
+  $scope.hasUsers = function () {
+    return Object.keys($scope.users).length > 0;
+  };
 
-  $socketService.global.on('addLobbyUser', function (user) {
-    $scope.$apply(function () {
-      $scope.users.push(user);
+  $scope.isLoggedIn = function () {
+    return !!$sessionService.currentUser;
+  };
+
+  $scope.sendInvite = function (invitee) {
+    $socketService.global.emit('sendInvite', invitee);
+  };
+
+  if ($scope.isLoggedIn()) {  
+    $socketService.global.emit('lobby', $sessionService.currentUser);
+    
+    $socketService.global.on('lobby', function (data) {
+      $scope.$apply(function () {
+        $scope.users = data.users;
+      });
     });
-  });
+
+    $socketService.global.on('addLobbyUser', function (user) {
+      $scope.$apply(function () {
+        $scope.users[user.id] = user;
+      });
+    });
+
+
+    $socketService.global.on('removeLobbyUser', function (id) {
+      $scope.$apply(function (){
+        delete $scope.users[id];
+      });
+    });
+
+    $socketService.global.on('recieveInvite', function (user) {
+      $scope.$apply(function () {
+        $scope.invites.push(user);
+      });
+    });
+
+    $socketService.global.on('cancelInvite', function (user) {
+      $scope.$apply(function (){
+        var index = $scope.invites.indexOf(user);
+        $scope.invites.splice(index, 1);
+      });
+    });
+
+  }
+
+
 }
 
 lobbyController.$inject = ['$scope', '$socketService', '$sessionService'];
@@ -130,12 +168,12 @@ function sessionController($scope, $sessionService, $routeSegment) {
 sessionController.$inject = ['$scope', '$sessionService', '$routeSegment'];
 angular.module('slamApp').controller('sessionController', sessionController);
 
-function userController($scope, user, $sessionService, $routeSegment) {
+function userController($scope, user, $sessionService, $routeSegment, $socketService) {
   $scope.currentUser = user;
-  console.log(user);
   $scope.segment = $routeSegment.chain[0];
 
   function reload () {
+    $socketService.disconnect();
     $scope.segment.reload();
   }
 
@@ -144,7 +182,7 @@ function userController($scope, user, $sessionService, $routeSegment) {
   };
 }
 
-userController.$inject = ['$scope', 'user', '$sessionService', '$routeSegment'];
+userController.$inject = ['$scope', 'user', '$sessionService', '$routeSegment', '$socketService'];
 angular.module('slamApp').controller('userController', userController);
 
 function card () {
@@ -277,8 +315,12 @@ function $socketService () {
     global: io.connect('http://localhost:3000')
   };
 
-  object.connect = function (channel) {
-    object[channel] = io.connect('http://localhost:3000/' + channel);
+  // object.connect = function (channel) {
+  //   object[channel] = io.connect('http://localhost:3000/' + channel);
+  // };
+
+  object.disconnect = function () {
+    return object.global.disconnect();
   };
 
   return object;

@@ -1,15 +1,29 @@
-<table>
-  <thead>
-    <tr>
-      <th>Username</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-if='users.length == 0'>
-      <tr><td>No users in lobby</td></tr>
-    </tr>
-    <tr ng-if='users.length > 0' ng-repeat='user in users'>
-      <td>{{user.username}}</td>
-    </tr>
-  </tbody>
-</table>
+<div ng-show='!isLoggedIn()'>
+  <span>Please login/register</span>
+</div>
+<div ng-show='isLoggedIn()'>
+  <ul>
+    <li ng-repeat='invitee in invites'>
+      {{invitee.username}} invites you to a game! <button ng-click='acceptInvite(invitee.id)'>Accept</button>
+    </li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-if='!hasUsers()'>
+       <td>No users in lobby</td>
+      </tr>
+
+      <tr ng-if='hasUsers()' ng-repeat='(key, value) in users'>
+        <td>{{value.username}}</td>
+        <td><button ng-click='sendInvite(value.id)' class='btn'>Invite</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
