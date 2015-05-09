@@ -90,6 +90,10 @@ function lobbyController($scope, $socketService, $sessionService) {
     $socketService.global.emit('sendInvite', invitee);
   };
 
+  $scope.acceptInvite = function (invitee) {
+    $socketService.global.emit('acceptInvite', invitee);
+  };
+
   if ($scope.isLoggedIn()) {  
     $socketService.global.emit('lobby', $sessionService.currentUser);
     
