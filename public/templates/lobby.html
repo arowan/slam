@@ -1,0 +1,15 @@
+<table>
+  <thead>
+    <tr>
+      <th>Username</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-if='users.length == 0'>
+      <tr><td>No users in lobby</td></tr>
+    </tr>
+    <tr ng-if='users.length > 0' ng-repeat='user in users'>
+      <td>{{user.username}}</td>
+    </tr>
+  </tbody>
+</table>

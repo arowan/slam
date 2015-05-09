@@ -13,13 +13,14 @@ angular.module('slamApp', [
     $routeSegmentProvider.options.autoLoadTemplates = true;
     $routeSegmentProvider
       .when('/', 'user.board')
+      .when('/lobby', 'user.lobby')
 
       .segment('user', {
         templateUrl: 'templates/user.html',
         controller: userController,
         resolve: {
-          user: ['sessionService', function (sessionService) {
-            return sessionService.current();
+          user: ['$sessionService', function ($sessionService) {
+            return $sessionService.current();
           }]
         },
         resolveFailed: {
@@ -33,6 +34,13 @@ angular.module('slamApp', [
           controller: boardController,
           templateUrl: 'templates/board.html'
         })
+
+        .segment('lobby', {
+          controller: lobbyController,
+          templateUrl: 'templates/lobby.html'
+        })
+
+
         .up()
       .up();
 
@@ -44,7 +52,7 @@ angular.module('slamServices', []);
 angular.module('slamFilters', []);
 angular.module('slamDirectives', []);
 
-function boardController($scope) {
+function boardController($scope, $socketService) {
   $scope.cards = ['2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'jh', 'qh', 'kh', 'ah', '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'jd', 'qd', 'kd', 'ad', '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c', '10c', 'jc', 'qc', 'kc', 'ac', '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'js', 'qs', 'ks', 'as'];
 
   $scope.hand = [];
@@ -57,13 +65,37 @@ function boardController($scope) {
     }
   })();
 
+  $socketService.global.on('test', function (data){
+    console.log(data);
+  });
 
 }
 
-boardController.$inject = ['$scope'];
+boardController.$inject = ['$scope', '$socketService'];
 angular.module('slamApp').controller('boardController', boardController);
 
-function sessionController($scope, sessionService, $routeSegment) {
+function lobbyController($scope, $socketService, $sessionService) {
+  $scope.users = [];
+
+  $socketService.global.emit('lobby', $sessionService.currentUser);
+  
+  $socketService.global.on('lobby', function (data) {
+    $scope.$apply(function () {
+      $scope.users = data.users;
+    });
+  });
+
+  $socketService.global.on('addLobbyUser', function (user) {
+    $scope.$apply(function () {
+      $scope.users.push(user);
+    });
+  });
+}
+
+lobbyController.$inject = ['$scope', '$socketService', '$sessionService'];
+angular.module('slamApp').controller('lobbyController', lobbyController);
+
+function sessionController($scope, $sessionService, $routeSegment) {
   $scope.user = {
     username: null,
     password: null
@@ -85,20 +117,20 @@ function sessionController($scope, sessionService, $routeSegment) {
 
   $scope.login = function () {
     resetError();
-    sessionService.login($scope.user, reload, setError);
+    $sessionService.login($scope.user, reload, setError);
   };
 
   $scope.register = function () {
     resetError();
-    sessionService.register($scope.user, reload, setError);
+    $sessionService.register($scope.user, reload, setError);
   };
 
 }
 
-sessionController.$inject = ['$scope', 'sessionService', '$routeSegment'];
+sessionController.$inject = ['$scope', '$sessionService', '$routeSegment'];
 angular.module('slamApp').controller('sessionController', sessionController);
 
-function userController($scope, user, sessionService, $routeSegment) {
+function userController($scope, user, $sessionService, $routeSegment) {
   $scope.currentUser = user;
   console.log(user);
   $scope.segment = $routeSegment.chain[0];
@@ -108,11 +140,11 @@ function userController($scope, user, sessionService, $routeSegment) {
   }
 
   $scope.logout = function () {
-    sessionService.logout(reload);
+    $sessionService.logout(reload);
   };
 }
 
-userController.$inject = ['$scope', 'user', 'sessionService', '$routeSegment'];
+userController.$inject = ['$scope', 'user', '$sessionService', '$routeSegment'];
 angular.module('slamApp').controller('userController', userController);
 
 function card () {
@@ -125,7 +157,7 @@ function card () {
     templateUrl: '/templates/components/card_template.html',
     link: function (scope, element) {
       scope.onMove = function (data) {
-        console.log(data, event);
+        console.log(data);
       };
     }
   };
@@ -176,7 +208,7 @@ function drag ($document) {
 drag.$inject = ['$document'];
 angular.module('slamDirectives').directive('drag', drag);
 
-function sessionService ($http, $cookies, $q) {
+function $sessionService ($http, $cookies, $q) {
 
   var object = {
     currentUser: null
@@ -237,5 +269,19 @@ function sessionService ($http, $cookies, $q) {
 
 }
 
-sessionService.$inject = ['$http', '$cookies', '$q'];
-angular.module('slamServices').service('sessionService', sessionService);
+$sessionService.$inject = ['$http', '$cookies', '$q'];
+angular.module('slamServices').service('$sessionService', $sessionService);
+
+function $socketService () {
+  var object = {
+    global: io.connect('http://localhost:3000')
+  };
+
+  object.connect = function (channel) {
+    object[channel] = io.connect('http://localhost:3000/' + channel);
+  };
+
+  return object;
+}
+
+angular.module('slamServices').service('$socketService', $socketService);

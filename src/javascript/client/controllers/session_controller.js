@@ -1,4 +1,4 @@
-function sessionController($scope, sessionService, $routeSegment) {
+function sessionController($scope, $sessionService, $routeSegment) {
   $scope.user = {
     username: null,
     password: null
@@ -20,15 +20,15 @@ function sessionController($scope, sessionService, $routeSegment) {
 
   $scope.login = function () {
     resetError();
-    sessionService.login($scope.user, reload, setError);
+    $sessionService.login($scope.user, reload, setError);
   };
 
   $scope.register = function () {
     resetError();
-    sessionService.register($scope.user, reload, setError);
+    $sessionService.register($scope.user, reload, setError);
   };
 
 }
 
-sessionController.$inject = ['$scope', 'sessionService', '$routeSegment'];
+sessionController.$inject = ['$scope', '$sessionService', '$routeSegment'];
 angular.module('slamApp').controller('sessionController', sessionController);

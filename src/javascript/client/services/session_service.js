@@ -1,4 +1,4 @@
-function sessionService ($http, $cookies, $q) {
+function $sessionService ($http, $cookies, $q) {
 
   var object = {
     currentUser: null
@@ -59,5 +59,5 @@ function sessionService ($http, $cookies, $q) {
 
 }
 
-sessionService.$inject = ['$http', '$cookies', '$q'];
-angular.module('slamServices').service('sessionService', sessionService);
+$sessionService.$inject = ['$http', '$cookies', '$q'];
+angular.module('slamServices').service('$sessionService', $sessionService);

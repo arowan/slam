@@ -13,13 +13,14 @@ angular.module('slamApp', [
     $routeSegmentProvider.options.autoLoadTemplates = true;
     $routeSegmentProvider
       .when('/', 'user.board')
+      .when('/lobby', 'user.lobby')
 
       .segment('user', {
         templateUrl: 'templates/user.html',
         controller: userController,
         resolve: {
-          user: ['sessionService', function (sessionService) {
-            return sessionService.current();
+          user: ['$sessionService', function ($sessionService) {
+            return $sessionService.current();
           }]
         },
         resolveFailed: {
@@ -33,6 +34,13 @@ angular.module('slamApp', [
           controller: boardController,
           templateUrl: 'templates/board.html'
         })
+
+        .segment('lobby', {
+          controller: lobbyController,
+          templateUrl: 'templates/lobby.html'
+        })
+
+
         .up()
       .up();
 
