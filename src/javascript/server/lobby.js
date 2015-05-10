@@ -1,46 +1,77 @@
+var matchMaker = require('./match_manager.js');
+
 var lobby = function (io) {
   object = {
     users: {},
     io: io,
-    sockets: {},
-    invites: {},
+    channel: 'lobby',
+    room: io.of('lobby'),
+    invites: {}
   };
 
-  object.invite = function (inviteeId, user) {
-    object.sockets[inviteeId].emit('recieveInvite', user);
-    object.invites[user.id].push(inviteeId);
+  var sendObject = function (socket) {
+    var o = {};
+    o[socket.id] = socket.user;
+    return o;
   };
 
-  object.addUser = function (user, socket) {
-    if (user.id) {
-      object.users[user.id] = user;
-      object.io.emit('addLobbyUser', user);
-      object.sockets[user.id] = socket;
-      object.invites[user.id] = [];
-    }
-  };
-
-  object.cancelInvite = function (inviteeId, user) {
-    object.sockets[inviteeId].emit('cancelInvite', user);
-    var index = object.invites[user.id].indexOf(inviteeId);
-    object.invites[user.id].splice(index, 1);
-  };
-
-  object.cancelAllInvites = function (user) {
-    var a = object.invites[user.id];
-    a.forEach(function (inviteeId) {
-      object.cancelInvite(inviteeId, user);
+  object.room.on('connection', function (socket) {
+   
+    socket.on('register', function (user) {
+      socket.emit('lobbyUsers', {users: object.users});
+      socket.user = user;
+      object.join(socket);
     });
-    delete object.invites[user.id];
+
+    socket.on('disconnect', function () {
+      object.leave(socket);
+    });
+
+    socket.on('accept', function (inviteeId) {
+      var match = matchMaker.add(object.io);
+      socket.emit('joinMatch', match.channel);
+      socket.broadcast.to(inviteeId).emit('joinMatch', match.channel);
+    });
+
+    socket.on('invite', function (inviteeId) {
+      if (!object.isInvited(socket, inviteeId)) {
+        socket.broadcast.to(inviteeId).emit('recieveInvite', socket.id);
+        object.invite(socket, inviteeId);
+      }
+    });
+
+    socket.on('cancelInvite', function (inviteeId) {
+      if (object.isInvited(socket, inviteeId)) {
+        socket.broadcast.to(inviteeId).emit('cancelInvite', socket.id);
+        object.cancelInvite(socket, inviteeId);
+      }
+    });
+
+  });
+
+  object.join = function (socket) {
+    this.users[socket.id] = socket.user;
+    this.invites[socket.id] = [];  
+    this.room.emit('addLobbyUser', sendObject(socket));
   };
 
-  object.removeUser = function (user) {
-    if (user.id) {
-      delete object.users[user.id];
-      delete object.sockets[user.id];
-      object.cancelAllInvites(user);
-      object.io.emit('removeLobbyUser', user.id);
-    }
+  object.leave = function (socket) {
+    delete this.users[socket.id];
+    delete this.invites[socket.id];
+    this.room.emit('removeLobbyUser', socket.id);
+  };
+
+  object.isInvited = function (socket, inviteeId) {
+    return this.invites[socket.id].indexOf(inviteeId) > -1;
+  };
+
+  object.invite = function (socket, inviteeId) {
+    this.invites[socket.id].push(inviteeId);
+  };
+
+  object.cancelInvite = function (socket, inviteeId) {
+    var index = this.invites[socket.id].indexOf(inviteeId);
+    this.invites[socket.id].splice(index, 1);
   };
 
   return object;

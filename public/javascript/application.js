@@ -14,6 +14,7 @@ angular.module('slamApp', [
     $routeSegmentProvider
       .when('/', 'user.board')
       .when('/lobby', 'user.lobby')
+      .when('/match/:id', 'user.match')
 
       .segment('user', {
         templateUrl: 'templates/user.html',
@@ -35,11 +36,26 @@ angular.module('slamApp', [
           templateUrl: 'templates/board.html'
         })
 
+        .segment('match', {
+          controller: matchController,
+          templateUrl: 'templates/match/index.html',
+          untilResolved: {
+            templateUrl: 'templates/match/joining.html'
+          },
+          resolve: {
+            user: ['$sessionService', function ($sessionService) {
+              return $sessionService.current();
+            }]
+          },
+          resolveFailed: {
+            templateUrl: 'templates/match/login.html'
+          }
+        })
+
         .segment('lobby', {
           controller: lobbyController,
           templateUrl: 'templates/lobby.html'
         })
-
 
         .up()
       .up();
@@ -74,9 +90,15 @@ function boardController($scope, $socketService) {
 boardController.$inject = ['$scope', '$socketService'];
 angular.module('slamApp').controller('boardController', boardController);
 
-function lobbyController($scope, $socketService, $sessionService) {
+function lobbyController($scope, $socketService, $sessionService, $location) {
   $scope.users = {};
   $scope.invites = [];
+
+  var cancelInvite = function (sessionId) {
+    var user = $scope.users[sessionId];
+    var index = $scope.invites.indexOf(user);
+    if (index > -1) $scope.invites.splice(index, 1);
+  };
 
   $scope.hasUsers = function () {
     return Object.keys($scope.users).length > 0;
@@ -87,55 +109,71 @@ function lobbyController($scope, $socketService, $sessionService) {
   };
 
   $scope.sendInvite = function (invitee) {
-    $socketService.global.emit('sendInvite', invitee);
+    $socketService.lobby.emit('invite', invitee);
   };
 
   $scope.acceptInvite = function (invitee) {
-    $socketService.global.emit('acceptInvite', invitee);
+    $socketService.lobby.emit('accept', invitee);
   };
 
   if ($scope.isLoggedIn()) {  
-    $socketService.global.emit('lobby', $sessionService.currentUser);
-    
-    $socketService.global.on('lobby', function (data) {
+    $socketService.joinLobby($sessionService.currentUser);
+   
+    $socketService.lobby.on('lobbyUsers', function (data) {
       $scope.$apply(function () {
         $scope.users = data.users;
       });
     });
 
-    $socketService.global.on('addLobbyUser', function (user) {
+    $socketService.lobby.on('addLobbyUser', function (data) {
       $scope.$apply(function () {
-        $scope.users[user.id] = user;
+        var key = Object.keys(data)[0];
+        $scope.users[key] = data[key];
       });
     });
 
-
-    $socketService.global.on('removeLobbyUser', function (id) {
+    $socketService.lobby.on('removeLobbyUser', function (sessionId) {
       $scope.$apply(function (){
-        delete $scope.users[id];
+        cancelInvite(sessionId);
+        delete $scope.users[sessionId];
       });
     });
 
-    $socketService.global.on('recieveInvite', function (user) {
+    $socketService.lobby.on('recieveInvite', function (sessionId) {
       $scope.$apply(function () {
-        $scope.invites.push(user);
+        var user = $scope.users[sessionId];
+        $scope.invites.push({id: sessionId, user: user});
       });
     });
 
-    $socketService.global.on('cancelInvite', function (user) {
+    $socketService.lobby.on('cancelInvite', function (sessionId) {
       $scope.$apply(function (){
-        var index = $scope.invites.indexOf(user);
-        $scope.invites.splice(index, 1);
+        cancelInvite(sessionId);
+      });
+    });
+
+    $socketService.lobby.on('joinMatch', function (matchChannel) {
+      $scope.$apply(function (){
+        $location.path('/match/' + matchChannel);
       });
     });
 
   }
+}
 
+lobbyController.$inject = ['$scope', '$socketService', '$sessionService', '$location'];
+angular.module('slamApp').controller('lobbyController', lobbyController);
+
+function matchController($scope, $socketService, user, $routeParams) {
+  $scope.cards = ['2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'jh', 'qh', 'kh', 'ah', '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'jd', 'qd', 'kd', 'ad', '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c', '10c', 'jc', 'qc', 'kc', 'ac', '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'js', 'qs', 'ks', 'as'];
+  $scope.hand = [];
+  
+  $socketService.joinMatch($routeParams.id);
 
 }
 
-lobbyController.$inject = ['$scope', '$socketService', '$sessionService'];
-angular.module('slamApp').controller('lobbyController', lobbyController);
+matchController.$inject = ['$scope', '$socketService', 'user', '$routeParams'];
+angular.module('slamApp').controller('matchController', matchController);
 
 function sessionController($scope, $sessionService, $routeSegment) {
   $scope.user = {
@@ -273,7 +311,7 @@ function $sessionService ($http, $cookies, $q) {
   };
 
   object.setCurrentUser = function (user) {
-    object.currentUser = user;
+    this.currentUser = user;
   };
 
   object.current = function () {
@@ -315,19 +353,28 @@ $sessionService.$inject = ['$http', '$cookies', '$q'];
 angular.module('slamServices').service('$sessionService', $sessionService);
 
 function $socketService () {
+  var host = 'http://localhost:3000';
+  
   var object = {
-    global: io.connect('http://localhost:3000')
+    host: host,
+    global: io.connect(host)
   };
 
-  // object.connect = function (channel) {
-  //   object[channel] = io.connect('http://localhost:3000/' + channel);
-  // };
-
   object.disconnect = function () {
-    return object.global.disconnect();
+    return this.global.disconnect();
+  };
+
+  object.joinLobby = function (user) {
+    this.lobby = io.connect(this.host + '/lobby');
+    this.lobby.emit('register', user);
+  };
+
+  object.joinMatch = function (id) {
+    this.match = io.connect(this.host + id);
   };
 
   return object;
 }
 
+$socketService.$inject = [];
 angular.module('slamServices').service('$socketService', $socketService);

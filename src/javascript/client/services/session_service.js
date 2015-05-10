@@ -21,7 +21,7 @@ function $sessionService ($http, $cookies, $q) {
   };
 
   object.setCurrentUser = function (user) {
-    object.currentUser = user;
+    this.currentUser = user;
   };
 
   object.current = function () {

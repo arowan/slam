@@ -1,17 +1,26 @@
 function $socketService () {
+  var host = 'http://localhost:3000';
+  
   var object = {
-    global: io.connect('http://localhost:3000')
+    host: host,
+    global: io.connect(host)
   };
 
-  // object.connect = function (channel) {
-  //   object[channel] = io.connect('http://localhost:3000/' + channel);
-  // };
-
   object.disconnect = function () {
-    return object.global.disconnect();
+    return this.global.disconnect();
+  };
+
+  object.joinLobby = function (user) {
+    this.lobby = io.connect(this.host + '/lobby');
+    this.lobby.emit('register', user);
+  };
+
+  object.joinMatch = function (id) {
+    this.match = io.connect(this.host + id);
   };
 
   return object;
 }
 
+$socketService.$inject = [];
 angular.module('slamServices').service('$socketService', $socketService);

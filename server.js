@@ -32,37 +32,22 @@ var io = require('socket.io')(server);
 
 var lobby = require('./src/javascript/server/lobby.js')(io);
 
+
 io.on('connection', function (socket) {
-  socket.emit('test', 'connected');
+  // socket.on('joinLobby', function (user) {
+  //   socket.user = user;
+  //   lobby.join(socket);
+  // });
 
-  socket.on('disconnect', function () {
-    if (socket.user) {
-      lobby.removeUser(socket.user);
-    }
-  });
+  // socket.on('disconnect', function () {
+  //   lobby.leave(socket);
+  // });
 
-  socket.on('sendInvite', function (inviteeId) {
-    lobby.invite(inviteeId, socket.user);    
-  });
-
-  socket.on('acceptInvite', function (data) {
-    console.log(data);
-  });
-
-  socket.on('cancelInvite', function (inviteeId) {
-    lobby.cancelInvite(inviteeId, socket.user);
-  });
-
-  socket.on('lobby', function (data) {
-    socket.user = data;
-    socket.emit('lobby', {users: lobby.users});
-    lobby.addUser(socket.user, socket);
-  });
-
-  socket.on('registerChannel', function (data) {
-    var chan = io.of('/' + data);
-  });
-
+  // socket.on('joinLobby', function (data) {
+  //   socket.user = data;
+  //   socket.emit('lobby', {users: lobby.users});
+  //   lobby.addUser(socket.user, socket);
+  // });
 });
 
 // Routing

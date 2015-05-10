@@ -3,8 +3,8 @@
 </div>
 <div ng-show='isLoggedIn()'>
   <ul>
-    <li ng-repeat='invitee in invites'>
-      {{invitee.username}} invites you to a game! <button ng-click='acceptInvite(invitee.id)'>Accept</button>
+    <li ng-repeat='invite in invites'>
+      {{invite.user.username}} invites you to a game! <button class='btn btn-success' ng-click='acceptInvite(invite.id)'>Accept</button>
     </li>
   </ul>
 
@@ -22,7 +22,7 @@
 
       <tr ng-if='hasUsers()' ng-repeat='(key, value) in users'>
         <td>{{value.username}}</td>
-        <td><button ng-click='sendInvite(value.id)' class='btn'>Invite</button></td>
+        <td><button ng-click='sendInvite(key)' class='btn'>Invite</button></td>
       </tr>
     </tbody>
   </table>

@@ -14,6 +14,7 @@ angular.module('slamApp', [
     $routeSegmentProvider
       .when('/', 'user.board')
       .when('/lobby', 'user.lobby')
+      .when('/match/:id', 'user.match')
 
       .segment('user', {
         templateUrl: 'templates/user.html',
@@ -35,11 +36,26 @@ angular.module('slamApp', [
           templateUrl: 'templates/board.html'
         })
 
+        .segment('match', {
+          controller: matchController,
+          templateUrl: 'templates/match/index.html',
+          untilResolved: {
+            templateUrl: 'templates/match/joining.html'
+          },
+          resolve: {
+            user: ['$sessionService', function ($sessionService) {
+              return $sessionService.current();
+            }]
+          },
+          resolveFailed: {
+            templateUrl: 'templates/match/login.html'
+          }
+        })
+
         .segment('lobby', {
           controller: lobbyController,
           templateUrl: 'templates/lobby.html'
         })
-
 
         .up()
       .up();
